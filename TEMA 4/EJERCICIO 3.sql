@@ -29,9 +29,19 @@ FROM comprador c
 	JOIN inmueble i USING (id_inmueble)
 	JOIN tipo t ON (i.tipo_inmueble = t.id_tipo)
 WHERE t.nombre IN ('Casa', 'Piso')
-	AND (provincia ILIKE 'Jaén' 
-		OR provincia ILIKE 'Córdoba')
-	AND precio_final BETWEEN 150000 AND 200000;
+	AND provincia IN ('Jaén', 'Córdoba')
+	AND precio_final BETWEEN 150000 AND 200000
+	AND age(fecha_operacion, fecha_alta) 
+	BETWEEN '3 mon'::INTERVAL AND '4 mon'::INTERVAL;
+
+SELECT MAX(precio_final)
+FROM inmueble 
+	JOIN operacion USING (id_inmueble)
+	JOIN tipo ON (tipo_inmueble = id_inmueble)
+WHERE tipo.nombre IN ('Casa', 'Piso')
+	AND date_part ('month', fecha_operacion) IN (7,8)
+	AND provincia = 'Huelva'
+	AND tipo_operacion = 'Alquiler';
 	
 SELECT *
 FROM tipo;
