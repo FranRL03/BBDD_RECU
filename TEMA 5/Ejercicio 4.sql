@@ -2,17 +2,21 @@
 Debe aparecer el nombre del aeropuerto de salida, el de llegada, la fecha y hora de salida 
 y llegada y la duración. */
 
-SELECT a2.nombre, a.nombre, salida, llegada, (salida - llegada) "duracion", to_char(salida, 'TMDay')
+/* Seleccionar el vuelo más largo (con mayor duración) de cada día de la semana. 
+Debe aparecer el nombre del aeropuerto de salida, el de llegada, la fecha y hora de salida 
+y llegada y la duración. */
+
+SELECT a2.nombre, a.nombre, salida, llegada, (llegada - salida) "duracion", to_char(salida, 'TMDay')
 FROM vuelo v 
 	JOIN aeropuerto a ON (a.id_aeropuerto = v.hasta)
 	JOIN aeropuerto a2 ON (a2.id_aeropuerto = v.desde)
-WHERE (salida - llegada) <= ALL (
-					SELECT (salida - llegada)
+WHERE (llegada - salida) >= ALL (
+					SELECT (llegada - salida)
 					FROM vuelo v2 
 					WHERE to_char(v.salida, 'TMDay') = to_char(v2.salida, 'TMDay')
 				)
-ORDER BY to_char(salida, 'TMDay'); 
-
+ORDER BY to_char(salida, 'TMDay')
+LIMIT 1;
 
 --Seleccionar el piso que se ha vendido más caro de cada provincia. Debe aparecer la provincia, 
 --el nombre del comprador, la fecha de la operación y la cuantía.
@@ -39,15 +43,19 @@ WHERE t.nombre ILIKE 'piso'
 Debe aparecer el nombre de la provincia, el nombre del mes, el resto de atributos de la tabla 
 inmueble y el precio final del alquiler. */
 						
-SELECT i.provincia, TO_CHAR(o.fecha_operacion, 'TMMonth'), i.*, o.precio_final
+SELECT TO_CHAR(o.fecha_operacion, 'TMMonth'), i.*, o.precio_final
 FROM inmueble i 
 	JOIN operacion o USING (id_inmueble)
 WHERE tipo_operacion ILIKE 'alquiler'
 	AND precio_final <= ALL (
 								SELECT precio_final
 								FROM inmueble i2 
-									JOIN operacion o2 (USING id_inmueble)
-								WHERE 
+									JOIN operacion o2 USING (id_inmueble)
+								WHERE tipo_operacion ILIKE 'alquiler'
+									AND i.provincia = i2.provincia
+									AND to_char(o.fecha_operacion, 'TMMonth') 
+										= to_char(o2.fecha_operacion, 'TMMonth') 
 	)
+ORDER BY TO_CHAR(o.fecha_operacion, 'TMMonth'),  i.provincia;
 
 
