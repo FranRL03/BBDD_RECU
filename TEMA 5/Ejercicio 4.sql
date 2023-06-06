@@ -14,3 +14,40 @@ WHERE (salida - llegada) <= ALL (
 ORDER BY to_char(salida, 'TMDay'); 
 
 
+--Seleccionar el piso que se ha vendido más caro de cada provincia. Debe aparecer la provincia, 
+--el nombre del comprador, la fecha de la operación y la cuantía.
+
+SELECT c.nombre, fecha_operacion, precio_final, provincia
+FROM inmueble i 
+	JOIN tipo t ON (t.id_tipo = i.tipo_inmueble)
+	JOIN operacion o USING (id_inmueble)
+	JOIN comprador c USING (id_cliente)
+WHERE t.nombre ILIKE 'piso'
+	AND tipo_operacion ILIKE 'venta'
+	AND precio_final >= ALL (
+					SELECT precio_final
+					FROM inmueble i2
+						JOIN tipo t2 ON (t2.id_tipo = i2.tipo_inmueble)
+						JOIN operacion o2 USING (id_inmueble)
+					WHERE t2.nombre ILIKE 'piso'
+						AND tipo_operacion ILIKE 'venta'
+						AND i.provincia = i2.provincia  
+							); 
+
+
+/* Seleccionar los alquileres más baratos de cada provincia y mes (da igual el día y el año). 
+Debe aparecer el nombre de la provincia, el nombre del mes, el resto de atributos de la tabla 
+inmueble y el precio final del alquiler. */
+						
+SELECT i.provincia, TO_CHAR(o.fecha_operacion, 'TMMonth'), i.*, o.precio_final
+FROM inmueble i 
+	JOIN operacion o USING (id_inmueble)
+WHERE tipo_operacion ILIKE 'alquiler'
+	AND precio_final <= ALL (
+								SELECT precio_final
+								FROM inmueble i2 
+									JOIN operacion o2 (USING id_inmueble)
+								WHERE 
+	)
+
+
